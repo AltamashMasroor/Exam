@@ -18,4 +18,4 @@ jobs:
       run: npm i newman 
     
     - name: run test
-      run: newman run postman_tests/Books.postman_collection.json -e postman_tests/test.postman_environment.json
+      run: newman run postman/Books.postman_collection.json -e postman/test.postman_environment.json
