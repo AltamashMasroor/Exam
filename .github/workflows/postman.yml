@@ -1,4 +1,4 @@
-name: Postman test cases
+name: PostmanTest
 
 on: [push]
 
