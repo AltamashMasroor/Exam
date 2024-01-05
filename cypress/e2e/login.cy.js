@@ -1,4 +1,4 @@
-describe ('Testcase to check the login Functionality', () => {
+describe('Testcase to check the login Functionality', () => {
 
     //Access the website www.saucedemo.com
     it('Saucedemo Login Testing', () => {
@@ -9,17 +9,17 @@ describe ('Testcase to check the login Functionality', () => {
 
 
         //Verify the login with wrong username and correct password
-        cy.get('#user-name').type('performance_glitch_user'); //Correct user
+        cy.get('#user-name').type('Altamash'); //Correct user
         cy.get('#password').type('secret_sauce'); //correct password
         cy.get('#login-button').type('{enter}');
         cy.wait(500);
 
-         //Verify the login with correct credentials
-         cy.reload();
-         cy.get('#user-name').type('standard_user');
-         cy.get('#password').type('secret_sauce');
-         cy.get('#login-button').type('{enter}');
-         cy.get('.product_label').should('exist');
-         cy.wait(500);
+        //Verify the login with correct credentials
+        cy.reload();
+        cy.get('#user-name').type('performance_glitch_user');
+        cy.get('#password').type('secret_sauce');
+        cy.get('#login-button').type('{enter}');
+        cy.get('.product_label').should('exist');
+        cy.wait(500);
     });
 })
