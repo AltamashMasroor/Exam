@@ -9,7 +9,7 @@ describe('Testcase to check the login Functionality', () => {
 
 
         //Verify the login with wrong username and correct password
-        cy.get('#user-name').type('Altamash'); //Correct user
+        cy.get('#user-name').type('Altamash'); //Incorrect user
         cy.get('#password').type('secret_sauce'); //correct password
         cy.get('#login-button').type('{enter}');
         cy.wait(500);
