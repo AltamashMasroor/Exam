@@ -1,0 +1,524 @@
+{
+	"info": {
+		"_postman_id": "fe8acc31-ddc9-47d9-84c7-f6913ab21118",
+		"name": "Books",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30866469"
+	},
+	"item": [
+		{
+			"name": "Status Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"console.log(pm.response.json())\r",
+							"\r",
+							"pm.test(\"Status message is OK\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.status).to.eql('OK');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/status",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of Books",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Response is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is an array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"let queryParams = pm.request.url.query.toObject();\r",
+							"\r",
+							"if (queryParams.type) {\r",
+							"    pm.test(\"Query parameter 'type' is correct\", function () {\r",
+							"        pm.expect(queryParams.type).to.oneOf(['fiction', 'non-fiction']);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"if (queryParams.limit) {\r",
+							"    pm.test(\"Query parameter 'limit' is a number between 1 and 20\", function () {\r",
+							"        pm.expect(parseInt(queryParams.limit)).to.be.within(1, 20);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Set bookId variable to an available book\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"\r",
+							"    var availableBook = jsonData.find(book => book.available === true);\r",
+							"    \r",
+							"    if (availableBook) {\r",
+							"        pm.environment.set(\"SingleAvailableBookId\", availableBook.id);\r",
+							"        pm.expect(pm.environment.get(\"SingleAvailableBookId\")).to.equal(availableBook.id);\r",
+							"    } else {\r",
+							"        pm.expect.fail(\"No available books found\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/books?type=fiction&limit=12",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "fiction"
+						},
+						{
+							"key": "limit",
+							"value": "12"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Single Book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 and response has book details\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('id');\r",
+							"    pm.expect(jsonData).to.have.property('name');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/books/:bookId",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						":bookId"
+					],
+					"variable": [
+						{
+							"key": "bookId",
+							"value": "{{SingleAvailableBookId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "API Client Registration",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful registration should return 201 status\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response should contain access token\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.accessToken).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Access token should not be empty\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.accessToken).to.not.be.empty;\r",
+							"    \r",
+							"    // Save the access token to an environment variable\r",
+							"    pm.environment.set(\"accessToken\", jsonData.accessToken);\r",
+							"});\r",
+							"pm.test(\"Handle already registered error\", function () {\r",
+							"    if (pm.response.code === 409) {\r",
+							"        pm.expect(pm.response.text()).to.include(\"API client already registered.\");\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"clientName\": \"{{$randomUserName}}\",\r\n   \"clientEmail\": \"{{$randomUserName}}@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{baseUrl}}/api-clients",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api-clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit an Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Order submission is successful\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"    var jsonData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(jsonData).to.have.property('created', true);\r",
+							"    \r",
+							"    pm.expect(jsonData).to.have.property('orderId').and.to.be.a('string');\r",
+							"    pm.expect(jsonData.orderId).to.not.be.empty;\r",
+							"\r",
+							"    pm.environment.set(\"lastOrderId\", jsonData.orderId);\r",
+							"\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"bookId\": 1,\r\n  \"customerName\": \"{{$randomFullName}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{baseUrl}}/orders",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get An Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has all required order fields\", function () {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(jsonData).to.be.an('object');\r",
+							"    pm.expect(Array.isArray(jsonData)).to.be.false;\r",
+							"\r",
+							"    pm.expect(jsonData).to.have.property('id').that.is.a('string');\r",
+							"    pm.expect(jsonData).to.have.property('bookId').that.is.a('number');\r",
+							"    pm.expect(jsonData).to.have.property('customerName').that.is.a('string');\r",
+							"    pm.expect(jsonData).to.have.property('createdBy').that.is.a('string');\r",
+							"    pm.expect(jsonData).to.have.property('quantity').that.is.a('number');\r",
+							"    pm.expect(jsonData).to.have.property('timestamp').that.is.a('number');\r",
+							"    pm.expect(jsonData.timestamp).to.be.a('number');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/orders/:orderId",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{lastOrderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update An Order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has all required order fields\", function () {\r",
+							"    pm.response.to.have.status(200)\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(jsonData).to.be.an('object');\r",
+							"    pm.expect(Array.isArray(jsonData)).to.be.false;\r",
+							"\r",
+							"    pm.expect(jsonData).to.have.property('id').that.is.a('string');\r",
+							"    pm.expect(jsonData).to.have.property('bookId').that.is.a('number');\r",
+							"    pm.expect(jsonData).to.have.property('customerName').that.is.a('string');\r",
+							"    pm.expect(jsonData).to.have.property('createdBy').that.is.a('string');\r",
+							"    pm.expect(jsonData).to.have.property('quantity').that.is.a('number');\r",
+							"    pm.expect(jsonData).to.have.property('timestamp').that.is.a('number');\r",
+							"    pm.expect(jsonData.timestamp).to.be.a('number');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerName\": \"{{$randomFullName}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{baseUrl}}/orders/:orderId",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{lastOrderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Orders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Response should be an array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Each order should have all required properties\", function () {\r",
+							"    const orders = pm.response.json();\r",
+							"    orders.forEach((order) => {\r",
+							"        pm.expect(order).to.have.keys(['id', 'bookId', 'customerName', 'createdBy', 'quantity', 'timestamp']);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Data types are correct for each property\", function () {\r",
+							"    const orders = pm.response.json();\r",
+							"    orders.forEach((order) => {\r",
+							"        pm.expect(order.id).to.be.a('string');\r",
+							"        pm.expect(order.bookId).to.be.a('number');\r",
+							"        pm.expect(order.customerName).to.be.a('string');\r",
+							"        pm.expect(order.createdBy).to.be.a('string');\r",
+							"        pm.expect(order.quantity).to.be.a('number');\r",
+							"        pm.expect(order.timestamp).to.be.a('number');\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Timestamps are valid and correctly ordered\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var previousTimestamp = 0;\r",
+							"    jsonData.forEach((order) => {\r",
+							"        pm.expect(order.timestamp).to.be.above(previousTimestamp);\r",
+							"        previousTimestamp = order.timestamp;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{baseUrl}}/orders",
+					"protocol": "https",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
